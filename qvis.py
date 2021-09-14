@@ -269,6 +269,7 @@ class Panel(tk.Tk):
 		importlib.reload(hscqueueconfig)	
 
 
+
 	def show_programs(self):
 		
 		# Check Dates
