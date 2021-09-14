@@ -1,5 +1,5 @@
 ## qvis
-#GUI tool for visualization of Subaru Telescope HSC Queue programs
+# GUI tool for visualization of Subaru Telescope HSC Queue programs
 
 The tool will open a Tkinter GUI and let you choose among different selection criteria 
 to define the set of OBs that will be visualized.
@@ -20,7 +20,7 @@ The required python packages are:
 - numpy
 - matplotlib
 
-#How to Use
+# How to Use
 
 You need to have a QDB access file. Request one to OCS group at Subaru. 
 Place your "qdb.yaml" file in the qvis main working directory and update the file name
