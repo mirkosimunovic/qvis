@@ -283,7 +283,11 @@ class Panel(tk.Tk):
 			self.dict_all,self.semester_text.get(),self.filepath_text.get(),
 			self.progpathmode.get(),self.maxOBdisp_text.get(),self.timewindow_obs.get()
 			)
-		self.call.connect()
+		notfound = self.call.connect()
+		if notfound:
+			tk.messagebox.showerror("Error", "Error: The QDB access file was not found.\n\nPlease check the file name on 'hscqueueconfig.py'\nand restart qvis if needed.")
+			return None		# Exit function if cannot connect to database
+
 		is_none = self.call.get_programs()
 		if is_none==None: 
 			tk.messagebox.showerror("Error", "Error: No Programs found.\n\n\t\tPlease check your network\n\t\tor Programs File.")

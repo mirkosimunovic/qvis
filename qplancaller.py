@@ -3,6 +3,7 @@ from ginga.misc.log import get_logger
 import os
 import pandas as pd
 import time
+from hscqueueconfig import qdbfile
 
 
 class Call:
@@ -31,11 +32,14 @@ class Call:
 		# create null logger
 		logger = get_logger("example1", log_stderr=False)
 		# config file for queue db access
-		q_conf_file = os.path.join(os.path.abspath('.'), "mirkosm.yml")
+		q_conf_file = os.path.join(os.path.abspath('.'), qdbfile)
 
 		# create handle to queue database (be sure it is running at the chosen address)
 		self.qdb = q_db.QueueDatabase(logger)
-		self.qdb.read_config(q_conf_file)
+		try: 
+			self.qdb.read_config(q_conf_file)
+		except FileNotFoundError:
+			return True
 		self.qdb.connect()
 
 		# make query object

@@ -3,6 +3,7 @@
 current_semester = "S21B"
 programfilepath = "/Users/msimunovic/Dropbox/HSC/QVis/programs.xlsx"
 maxobquery = 500     # Maximum number of OBs queried per Program
+qdbfile = "qdb.yml"		# File name for the QDB access file. Must be located inside the qvis working directory. 
 
 
 # Define all the lists of observing conditions in HSC Queue programs
