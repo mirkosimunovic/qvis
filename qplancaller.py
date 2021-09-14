@@ -6,6 +6,7 @@ import time
 from hscqueueconfig import qdbfile
 
 
+
 class Call:
 	def __init__(self,dict_val,semesters,filepath_text,progpathmode,maxOBquery,timewindow_obs):
 

@@ -1,4 +1,3 @@
-
 # Options
 current_semester = "S21B"
 programfilepath = "/Users/msimunovic/Dropbox/HSC/QVis/programs.xlsx"
