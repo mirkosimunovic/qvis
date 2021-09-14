@@ -257,7 +257,7 @@ class Panel(tk.Tk):
 	def set_as_default(self):
 
 		if not self.maxOBdisp_text.get().isdecimal(): 
-			tk.messagebox.showerror("Error", "    Plot Max OBs has to be numeric")
+			tk.messagebox.showerror("Error", "    Max OB number has to be numeric")
 			return
 		with open('hscqueueconfig.py','r') as configfile:
 			filedata = configfile.read()
