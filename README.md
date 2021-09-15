@@ -23,7 +23,7 @@ The required python packages are:
 ## How to Use
 
 You need to have a QDB access file. Request one to OCS group at Subaru. 
-Place your "qdb.yaml" file in the qvis main working directory and update the file name
+Place your "qdb.yml" file in the qvis main working directory and update the file name
 on hscqueueconfig.py if needed.
 
 Run the tool from command line
