@@ -27,4 +27,5 @@ Place your "qdb.yml" file in the qvis main working directory and update the file
 on hscqueueconfig.py if needed.
 
 Run the tool from command line
+
 $ python qvis.py
