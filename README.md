@@ -26,5 +26,15 @@ You need to have a QDB access file. Request one to OCS group at Subaru.
 Place your "qdb.yaml" file in the qvis main working directory and update the file name
 on hscqueueconfig.py if needed.
 
+You need to have downloaded the queue spreadsheet files for the semester.
+The files are located in nextcloud /subaru-support-queue-shared/HSC-S2**/ob/  
+- programs.xlsx
+- schedule.xlsx 
+- [all individual spreadsheet files of each program in the semester]
+
+
 Run the tool from command line
+
 $ python qvis.py
+
+Created by Mirko Simunovic. Email me at mirkosm@naoj.org. 

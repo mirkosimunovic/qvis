@@ -9,24 +9,29 @@ import qplancaller
 import tablewindow
 import qplan_plotter
 from tkcalendar import DateEntry
+import datetime
 from datetime import timedelta
 import time 
+import pytz
+local = pytz.timezone("US/Hawaii")
 import importlib
 from idlelib.tooltip import Hovertip
 import traceback
+import pandas as pd
 
 class Panel(tk.Tk):
 
 	def __init__(self):
 		super().__init__()
 		self.title("qvis")
-		self.geometry("291x718+0+50")
-		self.resizable(1,1)
+		self.geometry("291x748+0+50")
+		self.resizable(0,0)
 		style = ttk.Style(self)
 		style.theme_use('default')   # aqua, alt, default, clam, classic
 		self.dict_all = {}
 		self.semester_text=tk.StringVar()
 		self.filepath_text=tk.StringVar()
+		self.schedpath_text=tk.StringVar()
 		self.maxOBdisp_text = tk.StringVar()
 		self.tablecount = 0
 
@@ -88,11 +93,13 @@ class Panel(tk.Tk):
 		loadpath_frame.grid(row=0,column=1,sticky='news')
 		loadfilebutton = ttk.Button(loadpath_frame, text='From File', command=self.load_file_path)
 		loadfilebutton.grid(sticky='w', padx=2,pady=15)
-		Hovertip(loadfilebutton, "Select path to the 'programs.xlsx'\nspreadsheet file",hover_delay=500)
+		Hovertip(loadfilebutton, "Select path to the 'programs.xlsx' spreadsheet file\n\nThe individual program spreadsheet files for the\n"+
+			                      "semester should be in same directory.",hover_delay=500)
 		self.filepath_entry = ttk.Entry(pathframe,textvariable=self.filepath_text,background='white',foreground='black',width=15)
 		self.filepath_entry.grid(row=0,column=2,sticky='news',pady=15,padx=3)
 		self.filepath_entry.insert(0,hscqueueconfig.programfilepath)
-		Hovertip(self.filepath_entry, "Select path to the 'programs.xlsx'\nspreadsheet file",hover_delay=500)
+		Hovertip(self.filepath_entry, "Select path to the 'programs.xlsx' spreadsheet file\n\nThe individual program spreadsheet files for the\n"+
+			                          "semester should be in same directory.",hover_delay=500)
 		# Filter by Semesters Entry
 		ttk.Radiobutton(pathframe, text="", variable=self.progpathmode, value=2).grid(row=1,column=0,padx=(5,3),pady=15)
 		ttk.Label(pathframe,text="Filter by Sem:").grid(row=1,column=1,sticky='w',padx=4,pady=(10,1))
@@ -100,10 +107,18 @@ class Panel(tk.Tk):
 		semester_entry.grid(row=1,column=2,sticky='news',pady=(15,10),padx=3)
 		semester_entry.insert(0,hscqueueconfig.current_semester)
 		ttk.Label(pathframe,text="(use commas for list)",font=('Sans',9)).grid(row=2,column=2,sticky='w',padx=10,pady=0)
+		# Load Schedule file button
+		schedulefilepath = ttk.Button(tab_3, text='Schedule File path:', command=self.load_schedfile_path)
+		schedulefilepath.grid(row=2, sticky='w', padx=5,pady=15)
+		Hovertip(schedulefilepath, "Select path to the 'schedule.xlsx'\nspreadsheet file",hover_delay=500)
+		self.schedpath_entry = ttk.Entry(tab_3,textvariable=self.schedpath_text,background='white',foreground='black',width=15)
+		self.schedpath_entry.grid(row=2,column=2,sticky='news',pady=15,padx=3)
+		self.schedpath_entry.insert(0,hscqueueconfig.schedulefilepath)
+		Hovertip(self.schedpath_entry, "Select path to the 'schedule.xlsx'\nspreadsheet file",hover_delay=500)
 		# Maximum OBs displayed per Program
-		ttk.Label(tab_3,text="Max OBs number:").grid(row=2,column=0,sticky='w',padx=6,pady=(10,1))
+		ttk.Label(tab_3,text="Max OBs number:").grid(row=3,column=0,sticky='w',padx=6,pady=(10,1))
 		maxOBdisplay_entry = ttk.Entry(tab_3,textvariable=self.maxOBdisp_text,background='white',foreground='black',width=7)
-		maxOBdisplay_entry.grid(row=2,column=1,sticky='w',pady=(15,6),padx=5,columnspan=2)		
+		maxOBdisplay_entry.grid(row=3,column=1,sticky='w',pady=(15,6),padx=5,columnspan=2)		
 		maxOBdisplay_entry.insert(0,hscqueueconfig.maxobquery)
 		Hovertip(maxOBdisplay_entry, "Maximum number of OBs\nper Program in Query.\nThe remaining qualifying OBs\nwill be IGNORED.",hover_delay=500)
 
@@ -163,6 +178,13 @@ class Panel(tk.Tk):
 		show_button = ttk.Button(showframe, style='my.TButton', text='                     Show OBs                     ', command=self.show_programs)
 		show_button.grid(padx=10,pady=5,sticky='ew')
 
+
+		# Show only "Queue nights" checkbox
+		self.plot_queue_nights_only = tk.IntVar()
+		self.plot_queue_nights_only.set(1)
+		queue_only_button = ttk.Checkbutton(PlotFrame,text="Only Scheduled Queue Nights",variable=self.plot_queue_nights_only)
+		queue_only_button.grid(row=4,column=0,sticky=tk.W,padx=13,pady=5,columnspan=2)	
+		Hovertip(queue_only_button, "This will make the Figure show visibility only\nduring the Queue night runs according to the schedule.",hover_delay=500)
 		###########################################  Select All and Quit Buttons  ################################################
 
 		# Create the 'Select All' button.
@@ -254,6 +276,23 @@ class Panel(tk.Tk):
 		self.filepath_entry.delete(0,tk.END)
 		self.filepath_entry.insert(0,self.filepath)
 
+	def load_schedfile_path(self):
+
+		self.filepath = tk.filedialog.askopenfilename(title='Select path to Schedule file',initialdir='./')
+		self.schedpath_entry.delete(0,tk.END)
+		self.schedpath_entry.insert(0,self.filepath)
+
+	def get_schedule_df(self):
+		df = pd.read_excel(self.schedpath_text.get(),engine='openpyxl') 
+		df["start_dt"] = pd.to_datetime(df['date'].astype(str)+' '+df['start time'].astype(str))
+		df["end_dt"] = pd.to_datetime(df['date'].astype(str)+' '+df['end time'].astype(str))
+		df['start_dt'] = df['start_dt'].dt.tz_localize(local)
+		df['end_dt'] = df['end_dt'].dt.tz_localize(local)				
+		df = df.sort_values(by='start_dt',ascending=True,ignore_index=True)
+		df['end_dt'] = df.apply(lambda x: x['end_dt']+timedelta(days=1) if x['end_dt']<x['start_dt'] else x['end_dt'] ,axis=1)
+		df['obs_night'] = pd.to_datetime(df.apply(lambda x: x['start_dt'].date()-timedelta(days=1) if x['start_dt'].time()<datetime.time(8,0) else x['start_dt'].date(), axis=1))
+		return df		
+
 	def set_as_default(self):
 
 		if not self.maxOBdisp_text.get().isdecimal(): 
@@ -263,6 +302,7 @@ class Panel(tk.Tk):
 			filedata = configfile.read()
 		filedata = filedata.replace('current_semester = "'+hscqueueconfig.current_semester+'"','current_semester = "'+self.semester_text.get()+'"')
 		filedata = filedata.replace('programfilepath = "'+hscqueueconfig.programfilepath+'"','programfilepath = "'+self.filepath_text.get()+'"')
+		filedata = filedata.replace('schedulefilepath = "'+hscqueueconfig.schedulefilepath+'"','schedulefilepath = "'+self.schedpath_text.get()+'"')		
 		filedata = filedata.replace('maxobquery = '+str(int(hscqueueconfig.maxobquery)),'maxobquery = '+self.maxOBdisp_text.get())
 		with open('hscqueueconfig.py','w') as configfile:
 			filedata = configfile.write(filedata)
@@ -277,6 +317,21 @@ class Panel(tk.Tk):
 			tk.messagebox.showerror("Dates Error", "Error: 'Until' Date must be later or equal to 'From' Date.")
 			return None		# Exit function 
 
+		# Get the Queue night schedule from Schedule File
+		if self.plot_queue_nights_only.get()==True:
+			try:
+				self.queuenightschedule_df = self.get_schedule_df()
+			except Exception:
+				tk.messagebox.showerror("Error", "Error: Cannot load the schedule spreadsheet file.")
+				traceback.print_exc()				
+				return None     # Exit function
+			# check if period has queue nights	
+			if not any([(obs_night>=self.startdate.get_date() and obs_night<=self.enddate.get_date()) for obs_night in self.queuenightschedule_df['obs_night']]):
+				tk.messagebox.showerror("Dates Error", "Error: The selected date period does not contain any scheduled Queue nights.")
+				return None		# Exit function 
+		else:
+			self.queuenightschedule_df = None
+
 		print("")
 		print("== Searching Programs in QDB...")		
 		# Get the OBs from database
@@ -289,10 +344,28 @@ class Panel(tk.Tk):
 			tk.messagebox.showerror("Error", "Error: The QDB access file was not found.\n\nPlease check the file name on 'hscqueueconfig.py'\nand restart qvis if needed.")
 			return None		# Exit function if cannot connect to database
 
-		is_none = self.call.get_programs()
-		if is_none==None: 
+		pgms = self.call.get_programs()
+		if pgms==None: 
 			tk.messagebox.showerror("Error", "Error: No Programs found.\n\n\t\tPlease check your network\n\t\tor Programs File.")
 			return None		# Exit function if cannot connect to database
+
+		# Get Programs spreadsheet files if available
+		nofiles = []
+		for pgm in pgms:
+			try:
+				xls = pd.ExcelFile(self.filepath_text.get().split('programs.xlsx')[0]+'/'+pgm.proposal+'.xlsx',engine='openpyxl')
+				df1 = pd.read_excel(xls, 'ob')
+				df1 = df1.loc[df1.Code.notna()]
+				pgm.spsheet_obs = df1.Code.values
+			except Exception:
+				traceback.print_exc()
+				nofiles.append(pgm.proposal)
+				pgm.spsheet_obs = None
+		if len(nofiles)>0:	
+			tk.messagebox.showinfo("Warning", "Warning: Could not open spreadsheet files for following Programs:\n\n\t\t"+"\n\t\t".join(nofiles)+
+				                   "\n\nOBs will be obtained from DB, and may include OBs from older semesters.")
+			self.update()
+
 
 		# Get all OBs 
 		t0 = time.time()

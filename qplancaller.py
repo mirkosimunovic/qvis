@@ -89,29 +89,31 @@ class Call:
 
 	def get_exec_OBs(self):
 
-			executedOBs = list(self.qq.get_do_not_execute_ob_keys())
-			pposals = [pgm.proposal for pgm in self.pgms]
-			executedOBs = [OB for OB in executedOBs if OB[0] in pposals]
-			if len(executedOBs)>0: 
-				executedOBs = list(self.qq._ob_keys_to_obs(executedOBs))
-			else:
-				return []
-			d = dict()
-			for rec in executedOBs:
-				dd = d.setdefault(rec['program'], dict())
-				dd[rec['name']] = dict(total_time=rec['total_time'])
-			executedOBs = d
-			return executedOBs		
+		executedOBs = list(self.qq.get_do_not_execute_ob_keys())
+		pposals = [pgm.proposal for pgm in self.pgms]
+		executedOBs = [OB for OB in executedOBs if OB[0] in pposals]
+		if len(executedOBs)>0: 
+			executedOBs = list(self.qq._ob_keys_to_obs(executedOBs))
+		else:
+			return []
+		d = dict()
+		for rec in executedOBs:
+			dd = d.setdefault(rec['program'], dict())
+			dd[rec['name']] = dict(total_time=rec['total_time'])
+		executedOBs = d
+		return executedOBs		
 
-	def get_obs(self):
+	def get_obs(self):		
 
-		# Get all OBs in all programs
+		# Get all OBs in all programs (first OB search including observed OBs)
 		obs_all = []
 		for pgm in self.pgms:
 			prop = pgm.proposal
 			pgm.obs = []
 			obs = list(self.qq.get_obs_by_proposal(prop))
 			for ob in obs:
+				if pgm.spsheet_obs is not None and ob.name not in pgm.spsheet_obs:	# skip OB if not in semester spreadsheet 
+					continue
 				if self.is_ob_ok(ob):
 					ob.grade = pgm.grade		# add the grade key to the OB object.
 					ob.completion_rate = pgm.completion_rate		# add the grade key to the OB object.
@@ -129,14 +131,14 @@ class Call:
 
 	def get_observable_obs(self):
 
-		# get OBs that can be observed 
+		# get OBs that can be observed (second OB search to exclude observed OBs)
 		keys = list(self.qq.get_schedulable_ob_keys())
 		keys_names = [key[1] for key in keys]
 		obs_all = []
 		pgm_count = {}
 		for ob in self.obs:
 			this_name = ob.name
-			num = pgm_count.setdefault(ob.program.proposal,[])
+			num = pgm_count.setdefault(ob.program.proposal,[])		# Why am I using a list, and not an int counter??? Weird...
 			if len(num)>self.maxOBquery: 		# skip an OB if it exceeds the Max OBs per program
 				if ob.program.proposal not in self.skipped_pgm: self.skipped_pgm.append(ob.program.proposal)
 				continue

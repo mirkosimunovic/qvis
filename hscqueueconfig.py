@@ -1,7 +1,8 @@
 # Options
-current_semester = "S21B"
-programfilepath = "/Users/msimunovic/Dropbox/HSC/QVis/programs.xlsx"
-maxobquery = 500     # Maximum number of OBs queried per Program
+current_semester = "S22A"
+programfilepath = "/Users/msimunovic/Dropbox/HSC/QVis/assets/programs.xlsx"
+schedulefilepath = "/Users/msimunovic/Dropbox/HSC/QVis/assets/schedule.xlsx"
+maxobquery = 100     # Maximum number of OBs queried per Program
 qdbfile = "qdb.yml"		# File name for the QDB access file. Must be located inside the qvis working directory. 
 
 
@@ -34,9 +35,11 @@ label_dic = {
 "program":"program",
 "filter":"inscfg_filter", 
 "grade":"grade",
-"target":"target_name",
+"completion":"completion_rate",
 "seeing":"envcfg_seeing",
 "airmass":"envcfg_airmass",
 "transp":"envcfg_transparency",
 "moon":"envcfg_moon",
-"moon_sep":"envcfg_moon_sep"}
+"moon_sep":"envcfg_moon_sep",
+"target":"target_name"
+}
