@@ -38,3 +38,10 @@ Run the tool from command line
 $ python qvis.py
 
 Created by Mirko Simunovic. Email me at mirkosm@naoj.org. 
+
+<img width="1772" alt="Screen Shot 2022-02-09 at 12 57 56 PM" src="https://user-images.githubusercontent.com/19269287/153305084-013a48d8-7971-4423-9e67-bdd7118c2359.png">
+<img width="1766" alt="Screen Shot 2022-02-09 at 12 59 04 PM" src="https://user-images.githubusercontent.com/19269287/153305123-14068981-d9d2-4c53-b0d5-1efc2d5673bd.png">
+
+
+
+
