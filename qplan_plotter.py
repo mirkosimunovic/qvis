@@ -14,8 +14,8 @@ from qplan.util.site import get_site
 from qplan.entity import StaticTarget
 import airmass_plot
 subaru = get_site('subaru')
-#import matplotlib
-#matplotlib.use("TkAgg") # set the backend
+import matplotlib
+matplotlib.use("TkAgg") # set the backend
 import pandas as pd
 import numpy as np
 
