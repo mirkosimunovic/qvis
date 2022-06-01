@@ -162,10 +162,10 @@ class Call:
 			filters =  'NB'+ob.inscfg.filter.split('nb')[1]
 		else:
 			filters =  'HSC-'+ob.inscfg.filter
-		if seeing in self.seeing:
-			if airmass in self.airmass:
-				if transp in self.transp:
-					if (filters in self.bbfilters or filters in self.nbfilters):
+		if seeing in self.seeing:	# seeing must be exactly same
+			if transp in self.transp:	# transp must be exactly same
+				if any([float(airmass)<=float(min(max_,'999')) for max_ in self.airmass]): 	# airmass must be lower than higher limits (not used anymore in Queue schedule constraints)
+					if (filters in self.bbfilters or filters in self.nbfilters):	# Filters must be exactly same
 						return True
 
 		return False
