@@ -37,7 +37,7 @@ Run the tool from command line
 
 $ python qvis.py
 
-Created by Mirko Simunovic. Email me at mirkosm@naoj.org. 
+Created by Mirko Simunovic. Email me at mirkosm-at-naoj.org. 
 
 <img width="1772" alt="153305084-013a48d8-7971-4423-9e67-bdd7118c2359" src="https://user-images.githubusercontent.com/19269287/153316952-d5511081-d47b-41a6-871a-aabbac673d1d.png">
 <img width="1766" alt="153305123-14068981-d9d2-4c53-b0d5-1efc2d5673bd" src="https://user-images.githubusercontent.com/19269287/153316991-282a0ceb-4e64-4253-89ba-7168cc9c44e6.png">
