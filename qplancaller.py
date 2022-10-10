@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import time
 from hscqueueconfig import qdbfile
-
+import traceback
 
 
 class Call:
@@ -39,7 +39,8 @@ class Call:
 		self.qdb = q_db.QueueDatabase(logger)
 		try: 
 			self.qdb.read_config(q_conf_file)
-		except FileNotFoundError:
+		except Exception:
+			traceback.print_exc()
 			return True
 		self.qdb.connect()
 
@@ -53,16 +54,19 @@ class Call:
 		if self.progpathmode==1:
 			try:
 				df = pd.read_excel(self.filepath_text,engine='openpyxl')
+				df = df.dropna(how='all')	# This will drop the rows where ALL elements are missing.
 				active_pgms = list(df.proposal)
 				self.pgms = [self.qq.get_program(prog) for prog in active_pgms]
-			except:
+			except Exception:
+				traceback.print_exc()
 				return None
 
 		# get programs by semester
 		elif self.progpathmode==2:
 			try:
 				self.pgms = list(self.qq.get_program_by_semester(self.semesters))
-			except:
+			except Exception:
+				traceback.print_exc()
 				return None
 
 		# Filter by Grade

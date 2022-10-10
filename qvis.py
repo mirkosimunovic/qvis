@@ -284,6 +284,7 @@ class Panel(tk.Tk):
 
 	def get_schedule_df(self):
 		df = pd.read_excel(self.schedpath_text.get(),engine='openpyxl') 
+		df = df.dropna(how='all')  # drop the rows where ALL elements are missing
 		df["start_dt"] = pd.to_datetime(df['date'].astype(str)+' '+df['start time'].astype(str))
 		df["end_dt"] = pd.to_datetime(df['date'].astype(str)+' '+df['end time'].astype(str))
 		df['start_dt'] = df['start_dt'].dt.tz_localize(local)
