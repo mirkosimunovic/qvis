@@ -75,7 +75,7 @@ class Panel(tk.Tk):
 
 		# TAB 2 HSC Filters
 		# Make BB Filter Frame
-		self.bbfilt_vars,self.bbfilt_all = self.make_newFrame_doubleCol(tab_2,bbfilters,"Narrow Band",0,0,3,columnspan=2)
+		self.bbfilt_vars,self.bbfilt_all = self.make_newFrame_doubleCol(tab_2,bbfilters,"Broad Band",0,0,3,columnspan=2)
 		self.dict_all['bbfilters'] = {'all':self.bbfilt_all,'dict':self.bbfilt_vars}
 		# Make BB Filter Frame
 		self.nbfilt_vars,self.nbfilt_all = self.make_newFrame_doubleCol(tab_2,nbfilters,"Narrow Band",1,0,11,columnspan=2)
