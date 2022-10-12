@@ -75,10 +75,10 @@ class Panel(tk.Tk):
 
 		# TAB 2 HSC Filters
 		# Make BB Filter Frame
-		self.bbfilt_vars,self.bbfilt_all = self.make_newFrame(tab_2,bbfilters,"Broad Band",0,0)
+		self.bbfilt_vars,self.bbfilt_all = self.make_newFrame_doubleCol(tab_2,bbfilters,"Narrow Band",0,0,3,columnspan=2)
 		self.dict_all['bbfilters'] = {'all':self.bbfilt_all,'dict':self.bbfilt_vars}
 		# Make BB Filter Frame
-		self.nbfilt_vars,self.nbfilt_all = self.make_newFrame(tab_2,nbfilters,"Narrow Band",0,1)
+		self.nbfilt_vars,self.nbfilt_all = self.make_newFrame_doubleCol(tab_2,nbfilters,"Narrow Band",1,0,11,columnspan=2)
 		self.dict_all['nbfilters'] = {'all':self.nbfilt_all,'dict':self.nbfilt_vars}
 
 		# TAB 3 Options
@@ -220,10 +220,10 @@ class Panel(tk.Tk):
 		self.dict_all['grade']['dict']['Grade C'].set(0)
 		self.dict_all['grade']['dict']['Grade F'].set(0) 
 
-	def make_newFrame(self,tab,option_list,labelname,gridx,gridy):
+	def make_newFrame(self,tab,option_list,labelname,gridx,gridy,columnspan = 1, rowspan = 1):
 
 		newFrame = ttk.LabelFrame(tab,text=labelname)
-		newFrame.grid(row=gridx,column=gridy,padx=10,pady=10,sticky=tk.NW)
+		newFrame.grid(row=gridx,column=gridy,padx=10,pady=10,sticky=tk.NW,columnspan=columnspan,rowspan=rowspan)
 		# create checkbuttons
 		var_dict = {}
 		for option in option_list:
@@ -234,6 +234,25 @@ class Panel(tk.Tk):
 		ttk.Checkbutton(newFrame,text="(Un)Select All",command=self.select_all,var=sall).grid()
 	
 		return var_dict,sall
+
+
+	def make_newFrame_doubleCol(self,tab,option_list,labelname,gridx,gridy,LenCol,columnspan = 1, rowspan = 1,):
+
+		newFrame = ttk.LabelFrame(tab,text=labelname)
+		newFrame.grid(row=gridx,column=gridy,padx=10,pady=10,sticky=tk.NW,columnspan=columnspan,rowspan=rowspan)
+		# create checkbuttons
+		var_dict = {}
+		i = 0 
+		for option in option_list:
+			var = tk.IntVar()
+			ttk.Checkbutton(newFrame,text=option,variable=var).grid(row=i%LenCol,column=i//LenCol,sticky=tk.W)
+			var_dict[option] = var
+			i += 1
+		sall = tk.IntVar()
+		ttk.Checkbutton(newFrame,text="(Un)Select All",command=self.select_all,var=sall).grid()		
+
+		return var_dict,sall
+
 
 	def select_all(self):
 
