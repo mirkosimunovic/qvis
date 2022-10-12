@@ -1,5 +1,5 @@
 # Options
-current_semester = "S22A"
+current_semester = "S22B"
 programfilepath = "/Users/msimunovic/Dropbox/HSC/QVis/assets/programs.xlsx"
 schedulefilepath = "/Users/msimunovic/Dropbox/HSC/QVis/assets/schedule.xlsx"
 maxobquery = 100     # Maximum number of OBs queried per Program
@@ -19,7 +19,8 @@ nbfilters =[
 'NB400',				
 'NB430',				
 'NB468',				
-'NB497',				
+'NB497',
+'NB506',				
 'NB515',				
 'NB527',				
 'NB656',				
