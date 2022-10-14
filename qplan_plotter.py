@@ -21,7 +21,7 @@ import numpy as np
 
 minute_delta = 5   # frequency of elevation data in minutes
 gridfreq = 5		# frequency in minutes of the date grid for x-axis in plots.
-dark_moon_limit = 0.15   # maximum moon illumination fraction for 'dark' time
+dark_moon_limit = 0.25   # maximum moon illumination fraction for 'dark' time
 gray_moon_limit = 0.77   # maximum moon illumination fraction for 'gray' time
 #morning_cut = timefunc(8,19)        # the visibility plots will ignore times after this hour in the morning 
 #evening_cut = timefunc(15,40)		 # the visibility plots will ignore times before this hour in the evening
@@ -128,13 +128,13 @@ class night_window:
 		return False
 
 	def dark_time(self,info,moon_sep):
-		if info.moon_pct<=dark_moon_limit or info.moon_alt<=-0.5:
+		if info.moon_pct<=dark_moon_limit or info.moon_alt<=0:
 			if info.moon_sep>=moon_sep:
 				return True
 		return False 
 
 	def gray_time(self,info,moon_sep):
-		if info.moon_pct<=gray_moon_limit and info.moon_alt>-0.5:
+		if info.moon_pct<=gray_moon_limit and info.moon_alt>0:
 			if info.moon_sep>=moon_sep:
 				return True
 		return False 		
