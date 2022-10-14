@@ -21,11 +21,22 @@ import numpy as np
 
 minute_delta = 5   # frequency of elevation data in minutes
 gridfreq = 5		# frequency in minutes of the date grid for x-axis in plots.
-dark_moon_limit = 0.25   # maximum moon illumination fraction for 'dark' time
+dark_moon_limit = 0.15   # maximum moon illumination fraction for 'dark' time
 gray_moon_limit = 0.77   # maximum moon illumination fraction for 'gray' time
+#morning_cut = timefunc(8,19)        # the visibility plots will ignore times after this hour in the morning 
+#evening_cut = timefunc(15,40)		 # the visibility plots will ignore times before this hour in the evening
+# morning_cut = timefunc(7,29)        # the visibility plots will ignore times after this hour in the morning 
+# evening_cut = timefunc(17,30)		 # the visibility plots will ignore times before this hour in the evening
 morning_cut = timefunc(7,30)        # the visibility plots will ignore times after this hour in the morning 
 evening_cut = timefunc(17,30)		 # the visibility plots will ignore times before this hour in the evening
 
+
+
+def date2num(datetime_):
+	if datetime_ is None:
+		return 2
+	newtime = datetime_.replace(tzinfo=None)
+	return dt.date2num(newtime)
 
 
 #####################################################################
@@ -117,13 +128,13 @@ class night_window:
 		return False
 
 	def dark_time(self,info,moon_sep):
-		if info.moon_pct<=dark_moon_limit or info.moon_alt<=0.:
+		if info.moon_pct<=dark_moon_limit or info.moon_alt<=-0.5:
 			if info.moon_sep>=moon_sep:
 				return True
 		return False 
 
 	def gray_time(self,info,moon_sep):
-		if info.moon_pct<=gray_moon_limit and info.moon_alt>0.:
+		if info.moon_pct<=gray_moon_limit and info.moon_alt>-0.5:
 			if info.moon_sep>=moon_sep:
 				return True
 		return False 		
@@ -224,6 +235,7 @@ class Plot:
 			time = time + timedelta(days=1)
 			self.update_progbar(time)
 
+
 	def update_progbar(self,time):
 
 		self.root.pb['value'] = (time - self.sdate).days
@@ -307,10 +319,18 @@ class Plot:
 		groups = np.sort(self.df[group_by].unique()) if group_by=="completion_rate" else self.df[group_by].unique()
 		colors = cm.rainbow(np.linspace(0, 1, len(groups)))	
 		prgm_obs = {}
+
+		Yvalue = 0
 		for pgm in programs:	
+
 			dfpgm = self.df.loc[self.df.program==pgm].reset_index(drop=True)
 			request_windows_ = np.array(self.request_windows)[self.df.program==pgm]
 			colors_ = colors[[np.where(groups==g)[0][0] for g in dfpgm[group_by]]]
+			mapping = {item:i for i,item in enumerate(dfpgm[group_by].unique())}	# create mapping dict from groupping column
+			offsets = dfpgm[group_by].apply(lambda x: mapping[x])	# define an offset value using the group id number of each OB in this program
+			offsets = offsets-((len(mapping)-1)/2.0)		# offset values have to center in zero 		
+			offsets = offsets/max(1,max(offsets))*0.25 		# offset values have to be normalized to maximum 0.25 deviation from axis tick	
+
 			time = self.sdate
 			while time <= self.edate:
 				nw = self.nightvis_info[time.strftime("%y-%m-%d")]
@@ -330,14 +350,20 @@ class Plot:
 					continue
 				else:
 					prgm_obs.setdefault(pgm,1)
+				
 				dfpgm = dfpgm.loc[ind].reset_index(drop=True)	
 				request_windows_ = request_windows_[ind]
+				offsets_ = offsets[ind]
+				
 				if time.date() in self.nights_list:		# Only draw visibility windows if night is within the queried period (case of schedule only)
-					self.ax.hlines(dfpgm.program,
+					self.ax.hlines(offsets_+Yvalue,
 						[self.time2grid(nw.targ_dic[this_key(i,program,dfpgm,request_windows_)]['window_start']) for i,program in enumerate(dfpgm.program)],
 						[self.time2grid(nw.targ_dic[this_key(i,program,dfpgm,request_windows_)]['window_end']) for i,program in enumerate(dfpgm.program)],					
 						linewidth=20,alpha=0.4,color=colors_)
 				time = time + timedelta(days=1)
+
+			if pgm in prgm_obs: Yvalue += 1 # increase the Y value only if this program was drawn in plot.
+
 
 		patches = [mpatches.Patch(color=color, label=key) for (key, color) in zip(groups,colors)]
 		if len(patches)>20: plt.legend(handles=patches, bbox_to_anchor=(1, 1), loc='upper left',title=group_by,ncol=2)	
@@ -345,11 +371,14 @@ class Plot:
 		self.date_ax(self.fig,self.ax,self.date_grid)
 		ind00hr = np.where((self.date_grid.hour==0) & (self.date_grid.minute==0))[0]
 		self.ax.xaxis.set_ticks(ind00hr)		
+		self.ax.set_yticks(range(len(prgm_obs.keys())))
+		self.ax.set_yticklabels(list(prgm_obs.keys()))	# add back the names of the programs to the Y axis label		
 		plt.xlim(self.time2grid(self.sdate+timedelta(hours=24)),self.time2grid(self.edate))
 		plt.xticks(rotation=45)
 		plt.xlabel("Time (HST)")
 		plt.tight_layout()
 		plt.ylim(-1,len(prgm_obs.keys()))
+
 		self.ax.xaxis.grid(True)
 		self.ax.tick_params(top=False,right=False)
 		plt.show()
