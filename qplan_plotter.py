@@ -266,7 +266,7 @@ class Plot:
 	def fill_plot(self,group_by):
 
 		groups = np.sort(self.df[group_by].unique()) if group_by=="completion_rate" else self.df[group_by].unique()
-		colors = cm.rainbow(np.linspace(0, 1, len(groups)))
+		colors = cm.tab20(np.linspace(0, 1, len(groups)))
 		colors_ = colors[[np.where(groups==g)[0][0] for g in self.df[group_by]]]
 
 		self.fig.clf()
@@ -317,19 +317,19 @@ class Plot:
 
 		programs = self.df.program.unique()	
 		groups = np.sort(self.df[group_by].unique()) if group_by=="completion_rate" else self.df[group_by].unique()
-		colors = cm.rainbow(np.linspace(0, 1, len(groups)))	
+		colors = cm.tab20(np.linspace(0, 1, len(groups)))	
 		prgm_obs = {}
 
 		Yvalue = 0
 		for pgm in programs:	
 
 			dfpgm = self.df.loc[self.df.program==pgm].reset_index(drop=True)
-			request_windows_ = np.array(self.request_windows)[self.df.program==pgm]
-			colors_ = colors[[np.where(groups==g)[0][0] for g in dfpgm[group_by]]]
+			request_windows = np.array(self.request_windows)[self.df.program==pgm]
+			color_array = colors[[np.where(groups==g)[0][0] for g in dfpgm[group_by]]]
 			mapping = {item:i for i,item in enumerate(dfpgm[group_by].unique())}	# create mapping dict from groupping column
 			offsets = dfpgm[group_by].apply(lambda x: mapping[x])	# define an offset value using the group id number of each OB in this program
 			offsets = offsets-((len(mapping)-1)/2.0)		# offset values have to center in zero 		
-			offsets = offsets/max(1,max(offsets))*0.25 		# offset values have to be normalized to maximum 0.25 deviation from axis tick	
+			offsets = offsets/max(1,max(offsets))*0.3 		# offset values have to be normalized to maximum 0.3 deviation from axis tick	
 
 			time = self.sdate
 			while time <= self.edate:
@@ -344,22 +344,24 @@ class Plot:
 					self.ax.fill_betweenx(y=(-5,len(programs)+5),x1=self.time2grid(nw.mot12),x2=self.time2grid(nw.next_sunrise),facecolor='mediumslateblue',alpha=0.3)
 
 
-				ind = [i for i,program in enumerate(dfpgm.program) if nw.targ_dic[this_key(i,program,dfpgm,request_windows_)]['window_start'] is not None]
+				# Get index's for all OBs that are visible this night
+				ind = [i for i,program in enumerate(dfpgm.program) if nw.targ_dic[this_key(i,program,dfpgm,request_windows)]['window_start'] is not None]
 				if len(ind)==0:
 					time = time + timedelta(days=1)
 					continue
 				else:
 					prgm_obs.setdefault(pgm,1)
 				
-				dfpgm = dfpgm.loc[ind].reset_index(drop=True)	
-				request_windows_ = request_windows_[ind]
-				offsets_ = offsets[ind]
+				dfpgm_ = dfpgm.loc[ind].reset_index(drop=True)	# create the program's DataFrame for only OBs that have windows this night.
+				request_windows_ = request_windows[ind]
+				color_array_ = color_array[ind]
+				offsets_ = offsets[ind]		
 				
 				if time.date() in self.nights_list:		# Only draw visibility windows if night is within the queried period (case of schedule only)
 					self.ax.hlines(offsets_+Yvalue,
-						[self.time2grid(nw.targ_dic[this_key(i,program,dfpgm,request_windows_)]['window_start']) for i,program in enumerate(dfpgm.program)],
-						[self.time2grid(nw.targ_dic[this_key(i,program,dfpgm,request_windows_)]['window_end']) for i,program in enumerate(dfpgm.program)],					
-						linewidth=20,alpha=0.4,color=colors_)
+						[self.time2grid(nw.targ_dic[this_key(i,program,dfpgm_,request_windows_)]['window_start']) for i,program in enumerate(dfpgm_.program)],
+						[self.time2grid(nw.targ_dic[this_key(i,program,dfpgm_,request_windows_)]['window_end']) for i,program in enumerate(dfpgm_.program)],					
+						linewidth=15,color=color_array_)
 				time = time + timedelta(days=1)
 
 			if pgm in prgm_obs: Yvalue += 1 # increase the Y value only if this program was drawn in plot.
@@ -387,7 +389,7 @@ class Plot:
 	def fill_plot_num(self,group_by):
 
 		groups = np.sort(self.df[group_by].unique()) if group_by=="completion_rate" else self.df[group_by].unique()
-		colors = cm.rainbow(np.linspace(0, 1, len(groups)))
+		colors = cm.tab20(np.linspace(0, 1, len(groups)))
 
 		self.fig.clf()
 		self.ax = self.fig.add_subplot(111)			
