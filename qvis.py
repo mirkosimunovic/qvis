@@ -442,10 +442,9 @@ class Panel(tk.Tk):
 				self.plot.fill_plot_num(label_dic[self.groupby.get()])							
 			elif self.display.get()=="time sum":
 				self.plot.fill_plot_TotTime(label_dic[self.groupby.get()])
-		except AttributeError:
-			tk.messagebox.showerror("Error", "Error: There are no open plots.")							
 		except Exception:
-			 traceback.print_exc()
+			tk.messagebox.showerror("Error", "Error: There are no open plots.")
+			traceback.print_exc()
 		
 	def destroy_(self):
 		plt.close('all')
