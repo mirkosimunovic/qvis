@@ -309,7 +309,8 @@ class Panel(tk.Tk):
 		df['start_dt'] = df['start_dt'].dt.tz_localize(local)
 		df['end_dt'] = df['end_dt'].dt.tz_localize(local)				
 		df = df.sort_values(by='start_dt',ascending=True,ignore_index=True)
-		df['end_dt'] = df.apply(lambda x: x['end_dt']+timedelta(days=1) if x['end_dt']<x['start_dt'] else x['end_dt'] ,axis=1)
+		df['start_dt'] = df.apply(lambda x: x['start_dt']+timedelta(days=1) if x['start_dt'].time()<datetime.time(8,0) else x['start_dt'], axis=1)
+		df['end_dt'] = df.apply(lambda x: x['end_dt']+timedelta(days=1) if x['end_dt'].time()<datetime.time(8,0) else x['end_dt'] ,axis=1)
 		df['obs_night'] = pd.to_datetime(df.apply(lambda x: x['start_dt'].date()-timedelta(days=1) if x['start_dt'].time()<datetime.time(8,0) else x['start_dt'].date(), axis=1))
 		return df		
 
